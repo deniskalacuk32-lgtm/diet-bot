@@ -4,36 +4,29 @@ import express from 'express';
 const app = express();
 app.use(express.json());
 
-// простое логирование всех запросов
-app.use((req, _res, next) => {
-  console.log(`[REQ] ${req.method} ${req.path}`);
-  next();
+// Корневой маршрут
+app.get('/', (req, res) => {
+  res.json({ ok: true, message: 'Diet Bot API is running' });
 });
 
-// корень — на всякий случай
-app.get('/', (_req, res) => {
-  res.type('text').send('OK /');
+// Проверка
+app.get('/health', (req, res) => {
+  res.json({ ok: true });
 });
 
-// health-check (два варианта пути)
-app.get('/health', (_req, res) => {
-  res.json({ ok: true, path: '/health' });
-});
-app.get('/healthz', (_req, res) => {
-  res.json({ ok: true, path: '/healthz' });
-});
-
-// тестовый чат
+// Тестовый чат
 app.post('/diet-chat', (req, res) => {
   const { user_id, text } = req.body || {};
-  res.json({ message: `Привет, ${user_id}! Ты написал: ${text}` });
+  res.json({ message: `Привет, ${user_id || 'user'}! Ты написал: ${text || ''}` });
 });
 
-// отладочный catch-all (покажет какой путь пришёл)
+// 404 — если путь не найден
 app.use((req, res) => {
-  res.status(404).type('text').send(`No route for: ${req.method} ${req.path}`);
+  res.status(404).json({ ok: false, error: 'Not Found' });
 });
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`✅ Server running on port ${port}`));
+
+
 
